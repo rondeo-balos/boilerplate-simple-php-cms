@@ -8,16 +8,16 @@ require_once '../classes/Item.php';
 require_once '../classes/User.php';
 
 /**
- * vendor\bin\phpunit UserActionsTest.php
+ * vendor\bin\phpunit ActionsTest.php
  */
 
-class UserActionsTest extends TestCase {
+class ActionsTest extends TestCase {
 
     public function testUserActions() {
 
         // User Registration
         $user = new User( array(
-            'modifiedDate' => date( 'm-d-Y' ),
+            'modifiedDate' => date( 'Y-m-d H:i:s' ),
             'username' => 'test',
             'role' => 'basic',
             'firstname' => 'Firstname',
@@ -53,6 +53,27 @@ class UserActionsTest extends TestCase {
 
         // Delete User
         $this->assertTrue($existingUser->delete()); // Delete success
+    }
+
+    public function testItemActions() {
+        // Add new Item
+        $item = new Item( array(
+            'publicationDate' => date( 'Y-m-d H:i:s' ),
+            'title' => 'TestItem',
+            'summary' => 'Item Summary',
+            'content' => 'Item Content'
+        ) );
+        $this->assertTrue( $item->insert() );
+        
+        // Update Item
+        $item->title = 'New Title';
+        $item->summary = 'New Summary';
+        $item->content = 'New Content';
+
+        $this->assertTrue( $item->update() );
+
+        // Delete Item
+        $this->assertTrue( $item->delete() );
     }
 
 }

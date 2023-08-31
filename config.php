@@ -8,6 +8,7 @@ define( "CLASS_PATH", "classes" );
 define( "TEMPLATE_PATH", "templates" );
 define( "HOMEPAGE_NUM_ITEMS", 5 );
 require( CLASS_PATH . "/Item.php" );
+require( CLASS_PATH . "/User.php" );
 
 function handleException( $exception ) {
   echo "Sorry, a problem occurred. Please try later.";

@@ -12,7 +12,7 @@ class Item {
   public $id = null;
 
   /**
-  * @var int When the item was published
+  * @var string When the item was published
   */
   public $publicationDate = null;
 
@@ -40,7 +40,7 @@ class Item {
 
   public function __construct( $data=array() ) {
     if ( isset( $data['id'] ) ) $this->id = (int) $data['id'];
-    if ( isset( $data['publicationDate'] ) ) $this->publicationDate = (int) $data['publicationDate'];
+    if ( isset( $data['publicationDate'] ) ) $this->publicationDate = $data['publicationDate'];
     if ( isset( $data['title'] ) ) $this->title = preg_replace ( "/[^\.\,\-\_\'\"\@\?\!\:\$ a-zA-Z0-9()]/", "", $data['title'] );
     if ( isset( $data['summary'] ) ) $this->summary = preg_replace ( "/[^\.\,\-\_\'\"\@\?\!\:\$ a-zA-Z0-9()]/", "", $data['summary'] );
     if ( isset( $data['content'] ) ) $this->content = $data['content'];
@@ -57,16 +57,6 @@ class Item {
 
     // Store all the parameters
     $this->__construct( $params );
-
-    // Parse and store the publication date
-    if ( isset($params['publicationDate']) ) {
-      $publicationDate = explode ( '-', $params['publicationDate'] );
-
-      if ( count($publicationDate) == 3 ) {
-        list ( $y, $m, $d ) = $publicationDate;
-        $this->publicationDate = mktime ( 0, 0, 0, $m, $d, $y );
-      }
-    }
   }
 
 
@@ -79,7 +69,7 @@ class Item {
 
   public static function getById( $id ) {
     $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
-    $sql = "SELECT *, UNIX_TIMESTAMP(publicationDate) AS publicationDate FROM items WHERE id = :id";
+    $sql = "SELECT * FROM items WHERE id = :id";
     $st = $conn->prepare( $sql );
     $st->bindValue( ":id", $id, PDO::PARAM_INT );
     $st->execute();
@@ -98,8 +88,7 @@ class Item {
 
   public static function getList( $numRows=1000000 ) {
     $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
-    $sql = "SELECT SQL_CALC_FOUND_ROWS *, UNIX_TIMESTAMP(publicationDate) AS publicationDate FROM items
-            ORDER BY publicationDate DESC LIMIT :numRows";
+    $sql = "SELECT SQL_CALC_FOUND_ROWS * FROM items ORDER BY publicationDate DESC LIMIT :numRows";
 
     $st = $conn->prepare( $sql );
     $st->bindValue( ":numRows", $numRows, PDO::PARAM_INT );
@@ -126,19 +115,23 @@ class Item {
   public function insert() {
 
     // Does the Item object already have an ID?
-    if ( !is_null( $this->id ) ) trigger_error ( "Item::insert(): Attempt to insert an Item object that already has its ID property set (to $this->id).", E_USER_ERROR );
+    if ( !is_null( $this->id ) ) {
+      //trigger_error ( "Item::insert(): Attempt to insert an Item object that already has its ID property set (to $this->id).", E_USER_ERROR );
+      return false;
+    }
 
     // Insert the Item
     $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
-    $sql = "INSERT INTO items ( publicationDate, title, summary, content ) VALUES ( FROM_UNIXTIME(:publicationDate), :title, :summary, :content )";
+    $sql = "INSERT INTO items ( publicationDate, title, summary, content ) VALUES ( :publicationDate, :title, :summary, :content )";
     $st = $conn->prepare ( $sql );
-    $st->bindValue( ":publicationDate", $this->publicationDate, PDO::PARAM_INT );
+    $st->bindValue( ":publicationDate", $this->publicationDate, PDO::PARAM_STR );
     $st->bindValue( ":title", $this->title, PDO::PARAM_STR );
     $st->bindValue( ":summary", $this->summary, PDO::PARAM_STR );
     $st->bindValue( ":content", $this->content, PDO::PARAM_STR );
     $st->execute();
     $this->id = $conn->lastInsertId();
     $conn = null;
+    return true;
   }
 
 
@@ -149,19 +142,23 @@ class Item {
   public function update() {
 
     // Does the Item object have an ID?
-    if ( is_null( $this->id ) ) trigger_error ( "Item::update(): Attempt to update an Item object that does not have its ID property set.", E_USER_ERROR );
+    if ( is_null( $this->id ) ) {
+      //trigger_error ( "Item::update(): Attempt to update an Item object that does not have its ID property set.", E_USER_ERROR );
+      return false;
+    }
    
     // Update the Item
     $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
-    $sql = "UPDATE items SET publicationDate=FROM_UNIXTIME(:publicationDate), title=:title, summary=:summary, content=:content WHERE id = :id";
+    $sql = "UPDATE items SET publicationDate=:publicationDate, title=:title, summary=:summary, content=:content WHERE id = :id";
     $st = $conn->prepare ( $sql );
-    $st->bindValue( ":publicationDate", $this->publicationDate, PDO::PARAM_INT );
+    $st->bindValue( ":publicationDate", $this->publicationDate, PDO::PARAM_STR );
     $st->bindValue( ":title", $this->title, PDO::PARAM_STR );
     $st->bindValue( ":summary", $this->summary, PDO::PARAM_STR );
     $st->bindValue( ":content", $this->content, PDO::PARAM_STR );
     $st->bindValue( ":id", $this->id, PDO::PARAM_INT );
     $st->execute();
     $conn = null;
+    return true;
   }
 
 
@@ -172,7 +169,10 @@ class Item {
   public function delete() {
 
     // Does the Item object have an ID?
-    if ( is_null( $this->id ) ) trigger_error ( "Item::delete(): Attempt to delete an Item object that does not have its ID property set.", E_USER_ERROR );
+    if ( is_null( $this->id ) ){
+      //trigger_error ( "Item::delete(): Attempt to delete an Item object that does not have its ID property set.", E_USER_ERROR );
+      return false;
+    }
 
     // Delete the Item
     $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
@@ -180,6 +180,7 @@ class Item {
     $st->bindValue( ":id", $this->id, PDO::PARAM_INT );
     $st->execute();
     $conn = null;
+    return true;
   }
 
 }

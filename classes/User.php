@@ -12,7 +12,7 @@ class User {
 
     public function __construct( $data = array() ) {
         if ( isset( $data['id'] ) ) $this->id = (int) $data['id'];
-        if ( isset( $data['modifiedDate'] ) ) $this->modifiedDate = (int) $data['modifiedDate'];
+        if ( isset( $data['modifiedDate'] ) ) $this->modifiedDate = $data['modifiedDate'];
         if ( isset( $data['username'] ) ) $this->username = preg_replace ( "/[^\.\,\-\_\'\"\@\?\!\:\$ a-zA-Z0-9()]/", "", $data['username'] );
         if ( isset( $data['role'] ) ) $this->role = preg_replace ( "/[^\.\,\-\_\'\"\@\?\!\:\$ a-zA-Z0-9()]/", "", $data['role'] );
         if ( isset( $data['firstname'] ) ) $this->firstname = preg_replace ( "/[^\.\,\-\_\'\"\@\?\!\:\$ a-zA-Z0-9()]/", "", $data['firstname'] );
@@ -23,21 +23,11 @@ class User {
     public function storeFormValues ( $params ) {
         // Store all the parameters
         $this->__construct( $params );
-
-        // Parse and store the publication date
-        if ( isset($params['modifiedDate']) ) {
-            $modifiedDate = explode ( '-', $params['modifiedDate'] );
-
-            if ( count($modifiedDate) == 3 ) {
-                list ( $y, $m, $d ) = $modifiedDate;
-                $this->modifiedDate = mktime ( 0, 0, 0, $m, $d, $y );
-            }
-        }
     }
 
     public static function getById( $id ) {
         $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
-        $sql = "SELECT *, UNIX_TIMESTAMP(modifiedDate) AS modifiedDate FROM users WHERE id = :id";
+        $sql = "SELECT * FROM users WHERE id = :id";
         $st = $conn->prepare( $sql );
         $st->bindValue( ":id", $id, PDO::PARAM_INT );
         $st->execute();
@@ -48,7 +38,7 @@ class User {
 
     public static function getByEmail( $email ) {
         $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
-        $sql = "SELECT *, UNIX_TIMESTAMP(modifiedDate) AS modifiedDate FROM users WHERE email = :email";
+        $sql = "SELECT * FROM users WHERE email = :email";
         $st = $conn->prepare( $sql );
         $st->bindValue( ":email", $email, PDO::PARAM_STR );
         $st->execute();
@@ -59,8 +49,7 @@ class User {
 
     public static function getList( $numRows=1000000 ) {
         $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
-        $sql = "SELECT SQL_CALC_FOUND_ROWS *, UNIX_TIMESTAMP(modifiedDate) AS modifiedDate FROM users
-                ORDER BY modifiedDate DESC LIMIT :numRows";
+        $sql = "SELECT SQL_CALC_FOUND_ROWS * FROM users ORDER BY modifiedDate DESC LIMIT :numRows";
     
         $st = $conn->prepare( $sql );
         $st->bindValue( ":numRows", $numRows, PDO::PARAM_INT );
@@ -94,9 +83,9 @@ class User {
     
         // Insert the Item
         $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
-        $sql = "INSERT INTO users ( modifiedDate, username, password, role, firstname, lastname, email ) VALUES ( FROM_UNIXTIME(:modifiedDate), :username, :password, :role, :firstname, :lastname, :email )";
+        $sql = "INSERT INTO users ( modifiedDate, username, password, role, firstname, lastname, email ) VALUES ( :modifiedDate, :username, :password, :role, :firstname, :lastname, :email )";
         $st = $conn->prepare ( $sql );
-        $st->bindValue( ":modifiedDate", $this->modifiedDate, PDO::PARAM_INT );
+        $st->bindValue( ":modifiedDate", $this->modifiedDate, PDO::PARAM_STR );
         $st->bindValue( ":username", $this->username, PDO::PARAM_STR );
         if( $password != $retype ) {
             //trigger_error( "User::insert(): Password does not match. Please try again.", E_USER_ERROR );
@@ -115,7 +104,7 @@ class User {
 
     public function verify($password) {
         $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
-        $sql = "SELECT *, UNIX_TIMESTAMP(modifiedDate) AS modifiedDate FROM users WHERE id = :id";
+        $sql = "SELECT * FROM users WHERE id = :id";
         $st = $conn->prepare($sql);
         $st->bindValue(":id", $this->id, PDO::PARAM_INT);
         $st->execute();
@@ -139,9 +128,9 @@ class User {
        
         // Update the Item
         $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
-        $sql = "UPDATE users SET modifiedDate=FROM_UNIXTIME(:modifiedDate), username=:username, ".( $passwordchange ? "password=:password,":"")." role=:role, firstname=:firstname, lastname=:lastname, email=:email WHERE id = :id";
+        $sql = "UPDATE users SET modifiedDate=:modifiedDate, username=:username, ".( $passwordchange ? "password=:password,":"")." role=:role, firstname=:firstname, lastname=:lastname, email=:email WHERE id = :id";
         $st = $conn->prepare ( $sql );
-        $st->bindValue( ":modifiedDate", $this->modifiedDate, PDO::PARAM_INT );
+        $st->bindValue( ":modifiedDate", $this->modifiedDate, PDO::PARAM_STR );
         $st->bindValue( ":username", $this->username, PDO::PARAM_STR );
         if( !$this->verify( $oldpass ) ) {
             //trigger_error( "User::update(): Password incorrect. Please try again.", E_USER_ERROR );
