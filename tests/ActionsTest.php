@@ -61,7 +61,8 @@ class ActionsTest extends TestCase {
             'publicationDate' => date( 'Y-m-d H:i:s' ),
             'title' => 'TestItem',
             'summary' => 'Item Summary',
-            'content' => 'Item Content'
+            'content' => 'Item Content',
+            'status' => 'draft'
         ) );
         $this->assertTrue( $item->insert() );
         
@@ -69,6 +70,7 @@ class ActionsTest extends TestCase {
         $item->title = 'New Title';
         $item->summary = 'New Summary';
         $item->content = 'New Content';
+        $item->status = 'publish';
 
         $this->assertTrue( $item->update() );
 

@@ -31,6 +31,11 @@ class Item {
   */
   public $content = null;
 
+  /**
+   * @var string The status of the item
+   */
+  public $status = null;
+
 
   /**
   * Sets the object's properties using the values in the supplied array
@@ -44,6 +49,7 @@ class Item {
     if ( isset( $data['title'] ) ) $this->title = preg_replace ( "/[^\.\,\-\_\'\"\@\?\!\:\$ a-zA-Z0-9()]/", "", $data['title'] );
     if ( isset( $data['summary'] ) ) $this->summary = preg_replace ( "/[^\.\,\-\_\'\"\@\?\!\:\$ a-zA-Z0-9()]/", "", $data['summary'] );
     if ( isset( $data['content'] ) ) $this->content = $data['content'];
+    if ( isset( $data['status'] ) ) $this->status = preg_replace ( "/[^\.\,\-\_\'\"\@\?\!\:\$ a-zA-Z0-9()]/", "", $data['status'] );
   }
 
 
@@ -122,12 +128,13 @@ class Item {
 
     // Insert the Item
     $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
-    $sql = "INSERT INTO items ( publicationDate, title, summary, content ) VALUES ( :publicationDate, :title, :summary, :content )";
+    $sql = "INSERT INTO items ( publicationDate, title, summary, content, status ) VALUES ( :publicationDate, :title, :summary, :content, :status )";
     $st = $conn->prepare ( $sql );
     $st->bindValue( ":publicationDate", $this->publicationDate, PDO::PARAM_STR );
     $st->bindValue( ":title", $this->title, PDO::PARAM_STR );
     $st->bindValue( ":summary", $this->summary, PDO::PARAM_STR );
     $st->bindValue( ":content", $this->content, PDO::PARAM_STR );
+    $st->bindValue( ":status", $this->status, PDO::PARAM_STR );
     $st->execute();
     $this->id = $conn->lastInsertId();
     $conn = null;
@@ -149,13 +156,14 @@ class Item {
    
     // Update the Item
     $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
-    $sql = "UPDATE items SET publicationDate=:publicationDate, title=:title, summary=:summary, content=:content WHERE id = :id";
+    $sql = "UPDATE items SET publicationDate=:publicationDate, title=:title, summary=:summary, content=:content, status=:status WHERE id = :id";
     $st = $conn->prepare ( $sql );
+    $st->bindValue( ":id", $this->id, PDO::PARAM_INT );
     $st->bindValue( ":publicationDate", $this->publicationDate, PDO::PARAM_STR );
     $st->bindValue( ":title", $this->title, PDO::PARAM_STR );
     $st->bindValue( ":summary", $this->summary, PDO::PARAM_STR );
     $st->bindValue( ":content", $this->content, PDO::PARAM_STR );
-    $st->bindValue( ":id", $this->id, PDO::PARAM_INT );
+    $st->bindValue( ":status", $this->status, PDO::PARAM_STR );
     $st->execute();
     $conn = null;
     return true;

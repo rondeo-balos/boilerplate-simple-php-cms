@@ -6,6 +6,7 @@ CREATE TABLE items
     `title`           varchar(255) NOT NULL,                        # Full title of the item
     `summary`         text NOT NULL,                                # A short summary of the item
     `content`         mediumtext NOT NULL,                          # The HTML content of the item
+    `status`          varchar(100) NOT NULL,                        # Item status
     
     PRIMARY KEY (`id`)
 );
