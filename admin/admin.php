@@ -27,14 +27,17 @@ function content() {
         .fs-7 {
             font-size: 0.9rem !important;
         }
-        td .visible-on-hover {
+        tr .visible-on-hover {
             opacity: 0;
         }
         a {
             text-decoration: none;
         }
-        td:hover .visible-on-hover {
+        tr:hover .visible-on-hover {
             opacity: 1;
+        }
+        [order="asc"] i.bi:before {
+            content: "\f571";
         }
 
         @media (min-width: 992px) {
@@ -146,6 +149,19 @@ function content() {
                 $( '.sidebar' ).toggleClass( 'd-none' );
             } );
         } );
+
+        function sortTable(table, order, col) {
+            var asc   = order === 'asc',
+                tbody = table.find('tbody');
+
+            tbody.find('tr').sort(function(a, b) {
+                if (asc) {
+                    return $('td:nth-of-type('+col+')', a).text().localeCompare($('td:nth-of-type('+col+')', b).text());
+                } else {
+                    return $('td:nth-of-type('+col+')', b).text().localeCompare($('td:nth-of-type('+col+')', a).text());
+                }
+            }).appendTo(tbody);
+        }
     </script>
 <?php }
 

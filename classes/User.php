@@ -68,6 +68,38 @@ class User {
         return ( array ( "results" => $list, "totalRows" => $totalRows[0] ) );
     }
 
+    public static function getPagedList( $query = null ) {
+        if ($query === null) {
+            $query = new Query();
+        }
+
+        $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
+        $sql = "SELECT SQL_CALC_FOUND_ROWS * FROM users WHERE 
+                        username LIKE :search OR 
+                        firstname LIKE :search OR
+                        lastname LIKE :search OR
+                        email LIKE :search ORDER BY id ASC LIMIT :offset, :limit";
+
+        $st = $conn->prepare( $sql );
+        $st->bindValue( ":search",'%' . $query->search . '%', PDO::PARAM_STR );
+        $st->bindValue( ":offset", $query->offset, PDO::PARAM_INT );
+        $st->bindValue( ":limit", $query->limit, PDO::PARAM_INT );
+        $st->execute();
+        $list = array();
+    
+        while ( $row = $st->fetch() ) {
+            $item = new User( $row );
+            $list[] = $item;
+        }
+    
+        // Now get the total number of items that matched the criteria
+        $sql = "SELECT FOUND_ROWS() AS totalRows";
+        $totalRows = $conn->query( $sql )->fetch();
+        $totalPages = ceil( $totalRows[0] / $query->limit );
+        $conn = null;
+        return ( array ( "results" => $list, "totalRows" => $totalRows[0], "totalPages" => $totalPages ) );
+    }
+
     public function insert( $password, $retype ) {
         $exists = User::getByEmail( $this->email );
         if( !is_null($exists) ) {
