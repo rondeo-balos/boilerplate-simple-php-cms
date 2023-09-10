@@ -25,9 +25,22 @@
         <h1><?php echo get_title() ?></h1>
         <p class="mb-5">Users registered on the site</p>
 
+        <div class="row">
+            <div class="col-md-8"></div>
+            <div class="col-md-4">
+                <form method="GET">
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" name="search" placeholder="Search" aria-label="Search" aria-describedby="button-search">
+                        <button class="btn btn-outline-secondary" type="button" aria-label="Search Button" id="button-search"><i class="bi bi-search"></i></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
         <table class="table table-hover">
             <?php
                 thead();
+                $search = isset( $_GET[ 'search' ] ) ? '&search=' . $_GET['search'] : '';
                 $query = new Query(
                     array(
                         'search' => isset( $_GET[ 'search' ] ) ? $_GET['search'] : '',
@@ -58,20 +71,24 @@
 
             ?>
         </table>
-        <ul class="pagination">
-            <li class="page-item"><a class="page-link" href="?paged=1" aria-label="First Page">«</a></li>
-            <li class="page-item <?php if($query->paged <= 1){ echo 'disabled'; } ?>">
-                <a class="page-link" href="<?php if($query->paged <= 1){ echo '#'; } else { echo "?paged=".($query->paged - 1); } ?>" aria-label="Previous">‹</a>
-            </li>
-            <li class="page-item disabled"><a class="page-link"><?php echo "$query->paged of $users[totalPages]"; ?></a></li>
-            <li class="page-item <?php if($query->paged >= $users['totalPages']){ echo 'disabled'; } ?>">
-                <a class="page-link" href="<?php if($query->paged >= $users['totalPages']){ echo '#'; } else { echo "?paged=".($query->paged + 1); } ?>" aria-label="Next">›</a>
-            </li>
-            <li class="page-item"><a class="page-link" href="?paged=<?php echo $users['totalPages']; ?>" aria-label="Last Page">»</a></li>
-        </ul>
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-end">
+                <li class="page-item"><a class="page-link" href="?paged=1<?php echo $search; ?>" aria-label="First Page">«</a></li>
+                <li class="page-item <?php if($query->paged <= 1){ echo 'disabled'; } ?>">
+                    <a class="page-link" href="<?php if($query->paged <= 1){ echo '#'; } else { echo "?paged=".($query->paged - 1); } ?><?php echo $search; ?>" aria-label="Previous">‹</a>
+                </li>
+                <li class="page-item disabled"><a class="page-link"><?php echo "$query->paged of $users[totalPages]"; ?></a></li>
+                <li class="page-item <?php if($query->paged >= $users['totalPages']){ echo 'disabled'; } ?>">
+                    <a class="page-link" href="<?php if($query->paged >= $users['totalPages']){ echo '#'; } else { echo "?paged=".($query->paged + 1); } ?><?php echo $search; ?>" aria-label="Next">›</a>
+                </li>
+                <li class="page-item"><a class="page-link" href="?paged=<?php echo $users['totalPages']; ?><?php echo $search; ?>" aria-label="Last Page">»</a></li>
+            </ul>
+        </nav>
         <script>
             jQuery( document ).ready( function($) {
-                $( '.cb-select-all' );
+                $( '.cb-select-all' ).click( function(e) {
+                    $( 'input:checkbox' ).not( this ).prop( 'checked', this.checked );
+                } );
                 $( '[href="#sort"]' ).click( function(e) {
                     e.preventDefault();
                     sortTable( $('table'), $( this ).attr( "order" ), $( this ).parent().index() );
