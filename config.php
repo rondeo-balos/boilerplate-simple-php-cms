@@ -10,6 +10,7 @@ define( "CLASS_PATH", "classes" );
 require( CLASS_PATH . "/Item.php" );
 require( CLASS_PATH . "/User.php" );
 require( CLASS_PATH . "/Query.php" );
+require( CLASS_PATH . "/Table.php" );
 
 /*function handleException( $exception ) {
   echo "Sorry, a problem occurred. Please try later.\n".$exception->getMessage();
