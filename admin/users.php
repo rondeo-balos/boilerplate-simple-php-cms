@@ -32,7 +32,7 @@
                 'firstname' => 'Firstname',
                 'lastname' => 'Lastname',
                 'email' => 'Email',
-                'role' => 'Role'
+                'role' => 'Role' 
             ] );
             $table->prepare();
             $table->display();
