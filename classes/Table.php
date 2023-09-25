@@ -5,9 +5,10 @@ class Table {
     public $search = null;
     public $query = null;
     public $columns = [];
+    public $values = [];
     private $data = [];
 
-    public function __construct( $class, $columns ) {
+    public function __construct( $class, $columns, $values ) {
         $this->search = isset( $_GET[ 'search' ] ) ? '&search=' . $_GET['search'] : '';
         $this->query = new Query(
             array(
@@ -18,17 +19,23 @@ class Table {
         );
         $this->class = $class::getPagedList( $this->query );
         $this->columns = $columns;
+        $this->values = $values;
     }
 
     public function prepare() {
         foreach( $this->class['results'] as $result ) {
             $rowData = []; // Initialize an empty array for each row of data
 
-            foreach ($this->columns as $columnKey => $columnTitle) {
-                // Check if the column key exists in the result object
-                if (isset($result->$columnKey)) {
-                    // Add the data to the row with the column key as the associative key
-                    $rowData[$columnKey] = $result->$columnKey;
+            foreach ($this->columns  as $columnKey => $columnTitle ) {
+                if( isset( $this->values[$columnKey] ) && is_callable( $this->values[$columnKey] ) ) {
+                    // Use the custom rendering function if it exists in $values
+                    $rowData[$columnKey] = $this->values[$columnKey]( $result->$columnKey ?? null );
+                } elseif( isset( $result->$columnKey ) ) { // Check if the column key exists in the result object
+                        // Add the data to the row with the column key as the associative key
+                        $rowData[$columnKey] = $result->$columnKey;
+                } else {
+                    // Set a default value or leave it empty as needed
+                    $rowData[$columnKey] = '';
                 }
             }
 
@@ -44,7 +51,7 @@ class Table {
                 <form method="GET">
                     <div class="input-group mb-3">
                         <input type="text" class="form-control" name="search" placeholder="Search" aria-label="Search" aria-describedby="button-search">
-                        <button class="btn btn-outline-secondary" type="button" aria-label="Search Button" id="button-search"><i class="bi bi-search"></i></button>
+                        <button class="btn btn-outline-secondary" type="submit" aria-label="Search Button" id="button-search"><i class="bi bi-search"></i></button>
                     </div>
                 </form>
             </div>
