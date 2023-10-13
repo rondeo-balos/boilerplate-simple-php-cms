@@ -85,7 +85,14 @@ class Table {
             <script>
                 jQuery( document ).ready( function($) {
                     $( '.cb-select-all' ).click( function(e) {
-                        $( 'input:checkbox' ).not( this ).prop( 'checked', this.checked );
+                        $( 'table input:checkbox' ).not( this ).prop( 'checked', this.checked );
+                    } );
+                    $( 'table input:checkbox:not(.cb-select-all)' ).change( function(e) {
+                        if( $( 'table input:checkbox:not(.cb-select-all):checked' ).length === $( 'table input:checkbox:not(.cb-select-all)' ).length ) {
+                            $( '.cb-select-all' ).prop( 'checked', true );
+                        } else {
+                            $( '.cb-select-all' ).prop( 'checked', false );
+                        }
                     } );
                     $( '[href="#sort"]' ).click( function(e) {
                         e.preventDefault();

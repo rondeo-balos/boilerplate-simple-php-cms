@@ -10,6 +10,16 @@ class User {
     public $lastname = null;
     public $email = null;
 
+    public $definition = array(
+        'id' => [ null, null, null ],
+        'modifiedDate' => [ null, null, null ],
+        'username' => [ 'string', 'textfield', null ],
+        'role' => [ 'string', 'select', 'get_roles' ],
+        'firstname' => [ 'string', 'textfield', null ],
+        'lastname' => [ 'string', 'textfield', null ],
+        'email' => [ 'string', 'textfield', null ]
+    );
+
     public function __construct( $data = array() ) {
         if ( isset( $data['id'] ) ) $this->id = (int) $data['id'];
         if ( isset( $data['modifiedDate'] ) ) $this->modifiedDate = $data['modifiedDate'];
